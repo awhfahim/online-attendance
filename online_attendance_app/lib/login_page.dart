@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import 'authservice.dart';
@@ -37,7 +38,9 @@ class _LoginPageState extends State<LoginPage> {
         String accessToken = data["accessToken"];
         String refreshToken = data["refreshToken"];
 
-        // Save tokens
+        // Save tokens and Email
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('email', _emailController.text);
         await AuthService.saveTokens(accessToken, refreshToken);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -49,9 +52,23 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(builder: (context) => const HomePage()),
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Login Failed: ${response.body}")),
+      }  else {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Login Failed"),
+              content: Text("Error: ${response.body}"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
         );
       }
     }
@@ -91,10 +108,15 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Logo
+              // Replace the CircleAvatar with this:
               const CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage('assets/logo.png'), // Replace with your logo path
-                backgroundColor: Colors.transparent,
+                child: Icon(
+                  Icons.person,
+                  size: 50,
+                  color: Colors.white,
+                ),
+                backgroundColor: Colors.blueAccent,
               ),
               const SizedBox(height: 20),
 

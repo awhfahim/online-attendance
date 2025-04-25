@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:online_attendance_app/profile_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+import 'attendance_record.dart';
+import 'authservice.dart';
 import 'login_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -105,30 +108,53 @@ class HomePage extends StatelessWidget {
               leading: Icon(Icons.check_circle, color: Colors.green),
               title: Text("Mark Attendance"),
             ),
-            const ListTile(
-              leading: Icon(Icons.checklist, color: Colors.orange),
-              title: Text("View Attendance Records"),
+            ListTile(
+              leading: const Icon(Icons.calendar_today, color: Colors.blue),
+              title: const Text("Attendance Record"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AttendanceRecordPage()),
+                );
+              },
             ),
-            const ListTile(
-              leading: Icon(Icons.person, color: Colors.blue),
-              title: Text("Profile Management"),
+            ListTile(
+              leading: const Icon(Icons.person, color: Colors.blue),
+              title: const Text("Profile Management"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              },
             ),
             const Spacer(),
-            Center(
-              child: ElevatedButton(
-                onPressed: () => _addUser(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                ),
-                child: const Text(
-                  "Add User",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
+            FutureBuilder<bool>(
+              future: AuthService().isAdmin(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator(); // Show a loader while checking admin status
+                }
+                if (snapshot.data == true) {
+                  return Center(
+                    child: ElevatedButton(
+                      onPressed: () => _addUser(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                      ),
+                      child: const Text(
+                        "Add User",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink(); // Hide the button if not admin
+              },
             ),
             const SizedBox(height: 10),
             Center(
