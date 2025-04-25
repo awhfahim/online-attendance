@@ -13,6 +13,13 @@ class AuthService {
     await prefs.setString('refreshToken', refreshToken);
   }
 
+   Future<bool> isAdmin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email'); // Retrieve the stored email
+    const adminEmail = 'admin@example.com'; // Replace with your admin email
+    return email == adminEmail; // Check if the email matches the admin email
+  }
+
   // Get tokens
   static Future<Map<String, String?>> getTokens() async {
     final prefs = await SharedPreferences.getInstance();
